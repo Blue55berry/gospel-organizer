@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Shield, BarChart3, Database, Users, Church, Activity, Heart, MapPin, Phone } from "lucide-react";
+import { Settings, Shield, BarChart3, Database, Users, Church, Activity, Heart, MapPin, Phone, Key, Mail, Edit } from "lucide-react";
 import { ChurchMembersView } from "./ChurchMembersView";
 
 const mockChurches = [
@@ -67,8 +67,44 @@ const recentActivity = [
   }
 ];
 
+const mockVolunteers = [
+  {
+    id: 1,
+    name: "Sarah Johnson",
+    email: "sarah@church.org",
+    phone: "+1 (555) 111-2222",
+    churches: ["St. Mary's Cathedral", "Grace Community"],
+    status: "Active",
+    joinDate: "2023-01-15",
+    lastLogin: "2 hours ago"
+  },
+  {
+    id: 2,
+    name: "Mike Davis",
+    email: "mike@church.org", 
+    phone: "+1 (555) 333-4444",
+    churches: ["Faith Chapel"],
+    status: "Active",
+    joinDate: "2023-03-20",
+    lastLogin: "1 day ago"
+  },
+  {
+    id: 3,
+    name: "Emma Wilson",
+    email: "emma@church.org",
+    phone: "+1 (555) 555-6666", 
+    churches: ["Grace Community", "Faith Chapel"],
+    status: "Inactive",
+    joinDate: "2022-11-10",
+    lastLogin: "1 week ago"
+  }
+];
+
 export function AdminPanel() {
   const [selectedChurch, setSelectedChurch] = useState<string | null>(null);
+  const [selectedVolunteer, setSelectedVolunteer] = useState<any>(null);
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
   
   if (selectedChurch) {
     return (
@@ -203,17 +239,206 @@ export function AdminPanel() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="w-5 h-5" />
-                User Management
+                Volunteer Management
               </CardTitle>
-              <CardDescription>Manage volunteers and admin access</CardDescription>
+              <CardDescription>View volunteer details and manage access</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-muted-foreground">
-                <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p>User management interface coming soon</p>
+              <div className="space-y-4">
+                {mockVolunteers.map((volunteer) => (
+                  <Card key={volunteer.id} className="shadow-[var(--shadow-gentle)] hover:shadow-[var(--shadow-blessed)] transition-[var(--transition-sacred)]">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-4">
+                          <div className="w-12 h-12 rounded-full bg-[var(--gradient-divine)] flex items-center justify-center">
+                            <Users className="w-6 h-6 text-spiritual-foreground" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-semibold">{volunteer.name}</h3>
+                              <Badge variant={volunteer.status === "Active" ? "default" : "secondary"}>
+                                {volunteer.status}
+                              </Badge>
+                            </div>
+                            <div className="space-y-1 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-2">
+                                <Mail className="w-4 h-4" />
+                                {volunteer.email}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Phone className="w-4 h-4" />
+                                {volunteer.phone}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Church className="w-4 h-4" />
+                                {volunteer.churches.join(", ")}
+                              </div>
+                              <div className="text-xs">
+                                Joined: {volunteer.joinDate} • Last login: {volunteer.lastLogin}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => setSelectedVolunteer(volunteer)}
+                          >
+                            View Details
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              setSelectedVolunteer(volunteer);
+                              setIsEditingPassword(true);
+                            }}
+                          >
+                            <Key className="w-4 h-4 mr-2" />
+                            Reset Password
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             </CardContent>
           </Card>
+
+          {/* Volunteer Details Modal */}
+          {selectedVolunteer && !isEditingPassword && (
+            <Card className="mt-6 border-blessing/30">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span>Volunteer Details - {selectedVolunteer.name}</span>
+                  <Button variant="outline" size="sm" onClick={() => setSelectedVolunteer(null)}>
+                    Close
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Full Name</label>
+                      <p className="text-lg">{selectedVolunteer.name}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Email Address</label>
+                      <p>{selectedVolunteer.email}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Phone Number</label>
+                      <p>{selectedVolunteer.phone}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Assigned Churches</label>
+                      <div className="flex gap-1 mt-1">
+                        {selectedVolunteer.churches.map((church: string, index: number) => (
+                          <Badge key={index} variant="outline">{church}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Account Status</label>
+                      <p>
+                        <Badge variant={selectedVolunteer.status === "Active" ? "default" : "secondary"}>
+                          {selectedVolunteer.status}
+                        </Badge>
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Join Date</label>
+                      <p>{selectedVolunteer.joinDate}</p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">Last Login</label>
+                      <p>{selectedVolunteer.lastLogin}</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Password Reset Modal */}
+          {selectedVolunteer && isEditingPassword && (
+            <Card className="mt-6 border-spiritual/30">
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Key className="w-5 h-5" />
+                    Reset Password - {selectedVolunteer.name}
+                  </span>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => {
+                      setIsEditingPassword(false);
+                      setSelectedVolunteer(null);
+                      setNewPassword("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Volunteer Email</label>
+                    <p className="text-lg">{selectedVolunteer.email}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label htmlFor="newPassword" className="text-sm font-medium">
+                      New Password
+                    </label>
+                    <input
+                      id="newPassword"
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Enter new password"
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    />
+                  </div>
+                  <div className="bg-muted/50 p-4 rounded-lg">
+                    <p className="text-sm text-muted-foreground">
+                      <strong>Note:</strong> This will update the volunteer's password. They will need to use the new password for their next login.
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline"
+                      onClick={() => {
+                        setIsEditingPassword(false);
+                        setSelectedVolunteer(null);
+                        setNewPassword("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      className="bg-[var(--gradient-divine)]"
+                      onClick={() => {
+                        // Password update logic would go here
+                        alert(`Password updated for ${selectedVolunteer.name}`);
+                        setIsEditingPassword(false);
+                        setSelectedVolunteer(null);
+                        setNewPassword("");
+                      }}
+                    >
+                      Update Password
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
         
         <TabsContent value="settings">

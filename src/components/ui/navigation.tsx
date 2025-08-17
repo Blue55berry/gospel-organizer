@@ -7,15 +7,22 @@ interface NavigationProps {
   activePanel: string;
   onPanelChange: (panel: string) => void;
   notifications: number;
+  userType?: string;
+  onLogout?: () => void;
 }
 
-export function Navigation({ activePanel, onPanelChange, notifications }: NavigationProps) {
-  const navItems = [
-    { id: "dashboard", label: "Dashboard", icon: Church },
-    { id: "members", label: "Members", icon: Users },
-    { id: "volunteer", label: "Volunteer Panel", icon: UserPlus },
-    { id: "admin", label: "Admin Panel", icon: Settings },
+export function Navigation({ activePanel, onPanelChange, notifications, userType, onLogout }: NavigationProps) {
+  const allNavItems = [
+    { id: "dashboard", label: "Dashboard", icon: Church, roles: ["admin", "volunteer"] },
+    { id: "members", label: "Members", icon: Users, roles: ["admin", "volunteer"] },
+    { id: "volunteer", label: "Volunteer Panel", icon: UserPlus, roles: ["volunteer"] },
+    { id: "admin", label: "Admin Panel", icon: Settings, roles: ["admin"] },
   ];
+
+  // Filter nav items based on user type
+  const navItems = allNavItems.filter(item => 
+    !userType || item.roles.includes(userType)
+  );
 
   return (
     <Card className="p-4 shadow-[var(--shadow-gentle)] bg-gradient-to-r from-card to-peace/30">
@@ -28,15 +35,24 @@ export function Navigation({ activePanel, onPanelChange, notifications }: Naviga
             <h1 className="text-xl font-bold bg-[var(--gradient-divine)] bg-clip-text text-transparent">
               Church Management
             </h1>
-            <p className="text-sm text-muted-foreground">Faith • Family • Fellowship</p>
+            <p className="text-sm text-muted-foreground">
+              Faith • Family • Fellowship {userType && `• ${userType.charAt(0).toUpperCase() + userType.slice(1)}`}
+            </p>
           </div>
         </div>
-        <div className="relative">
-          <Bell className="w-5 h-5 text-muted-foreground" />
-          {notifications > 0 && (
-            <Badge variant="destructive" className="absolute -top-2 -right-2 w-5 h-5 p-0 flex items-center justify-center text-xs">
-              {notifications}
-            </Badge>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Bell className="w-5 h-5 text-muted-foreground" />
+            {notifications > 0 && (
+              <Badge variant="destructive" className="absolute -top-2 -right-2 w-5 h-5 p-0 flex items-center justify-center text-xs">
+                {notifications}
+              </Badge>
+            )}
+          </div>
+          {onLogout && (
+            <Button variant="outline" size="sm" onClick={onLogout}>
+              Logout
+            </Button>
           )}
         </div>
       </div>

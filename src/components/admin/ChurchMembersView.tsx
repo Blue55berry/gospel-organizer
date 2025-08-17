@@ -115,6 +115,17 @@ export function ChurchMembersView({ churchName, onBack }: ChurchMembersViewProps
   const [selectedMember, setSelectedMember] = useState<any>(null);
   
   const members = churchData[churchName as keyof typeof churchData]?.members || [];
+  
+  const findMemberByName = (name: string) => {
+    return members.find(member => member.name === name);
+  };
+  
+  const handleFamilyMemberClick = (familyMemberName: string) => {
+    const familyMember = findMemberByName(familyMemberName);
+    if (familyMember) {
+      setSelectedMember(familyMember);
+    }
+  };
   const filteredMembers = members.filter(member =>
     member.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -261,12 +272,23 @@ export function ChurchMembersView({ churchName, onBack }: ChurchMembersViewProps
               <TabsContent value="family" className="space-y-4">
                 {selectedMember.familyMembers.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {selectedMember.familyMembers.map((familyMember, index) => (
-                      <Badge key={index} variant="secondary" className="justify-start p-2">
-                        <Users className="w-3 h-3 mr-2" />
-                        {familyMember}
-                      </Badge>
-                    ))}
+                    {selectedMember.familyMembers.map((familyMember, index) => {
+                      const memberExists = findMemberByName(familyMember);
+                      return (
+                        <Badge 
+                          key={index} 
+                          variant="secondary" 
+                          className={`justify-start p-2 ${memberExists ? 'cursor-pointer hover:bg-primary/20 transition-colors' : ''}`}
+                          onClick={() => memberExists && handleFamilyMemberClick(familyMember)}
+                        >
+                          <Users className="w-3 h-3 mr-2" />
+                          {familyMember}
+                          {memberExists && (
+                            <span className="ml-2 text-xs text-primary">• View Details</span>
+                          )}
+                        </Badge>
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="text-center py-4 text-muted-foreground">
